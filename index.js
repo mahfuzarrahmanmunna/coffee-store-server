@@ -44,13 +44,27 @@ async function run() {
       console.log(newCoffee);
     })
 
-    // const get single coffee
+    // const get single coffee to find
     app.get('/coffees/:id', async(req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await coffeesCollection.findOne(query);
       res.send(result)
     })
+
+    // Updated Method (update method its mean put method. i forget that. so bad)
+    app.put('/coffees/:id', async (req, res) => {
+      const id = req.params.id
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedCoffee = req.body;
+      const updatedDoc = {
+        $set: updatedCoffee
+      }
+      const result = await coffeesCollection.updateOne(filter, updatedDoc, options)
+      res.send(result)
+    })
+    
 
     // Delete method
     app.delete('/coffees/:id', async(req, res) => {
