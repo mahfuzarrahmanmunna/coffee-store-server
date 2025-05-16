@@ -27,7 +27,8 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    const coffeesCollection = client.db('coffeeDB').collection('coffees')
+    const coffeesCollection = client.db('coffeeDB').collection('coffees');
+    const usersCollection = client.db('coffeeDB').collection("users")
 
     // Get Method
     app.get("/coffees", async(req, res) => {
@@ -72,7 +73,56 @@ async function run() {
       const query = { _id: new ObjectId(id)}
       const result = await coffeesCollection.deleteOne(query);
       res.send(result)
-})
+    })
+    
+
+
+
+    // Here Users related DB
+    // users api creation
+    app.get("/users", async(req, res) => {
+      const cursor = usersCollection.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    // single user api creation
+    app.get('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.findOne(query);
+      res.send(result)
+    })
+
+    // user post method
+    app.post('/users', async(req, res) => {
+      const userProfile = req.body;
+      const result = await usersCollection.insertOne(userProfile)
+      res.send(result)
+      console.log(userProfile);
+    })
+
+    // patch method in user
+    app.patch('/users', async (req, res) => {
+      const { email, lastSignInTime } = req.body;
+      const filter = { email };
+      const updatedDoc = {
+        $set:{
+          lastSignInTime: lastSignInTime
+        }
+      }
+      const result = await usersCollection.updateOne(filter, updatedDoc);
+      res.send(result)
+    })
+
+
+    // user delete method
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result)
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
